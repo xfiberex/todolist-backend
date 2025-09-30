@@ -1,5 +1,7 @@
+import crypto from 'crypto';
+
 const generarId = () => {
-    return Date.now().toString(32) + Math.random().toString(32).substring(2);
+  return crypto.randomBytes(20).toString('hex');
 };
 
 export default generarId;

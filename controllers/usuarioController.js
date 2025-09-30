@@ -2,8 +2,15 @@ import Usuario from "../models/Usuario.js";
 import generarJWT from "../helpers/generarJWT.js";
 import { emailRegistro, emailOlvidePassword } from "../helpers/emails.js";
 import generarId from "../helpers/generarId.js"; // Suponiendo que tienes un helper similar para tokens simples
+import { validationResult } from "express-validator";
 
 export const registrar = async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { email, nombre, apellido } = req.body;
 
     // 1. Validación de campos vacíos
