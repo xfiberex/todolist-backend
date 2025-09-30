@@ -20,10 +20,11 @@ const whitelist = [process.env.FRONTEND_URL]; // URL de tu frontend
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (whitelist.includes(origin)) {
+    if (!origin || whitelist.includes(origin)) {
+      // Permitir solicitudes sin origen (por ejemplo, Postman) y desde el frontend
       callback(null, true);
     } else {
-      callback(new Error('Error de Cors'));
+      callback(new Error("Error de Cors"));
     }
   },
 };

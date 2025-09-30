@@ -6,6 +6,12 @@ import generarId from "../helpers/generarId.js"; // Suponiendo que tienes un hel
 export const registrar = async (req, res) => {
     const { email, nombre, apellido } = req.body;
 
+    // 1. Validación de campos vacíos
+    if ([nombre, apellido, email].some((campo) => !campo || campo.trim() === "")) {
+        const error = new Error("Todos los campos son obligatorios");
+        return res.status(400).json({ msg: error.message });
+    }
+
     // Prevenir usuarios duplcleicados
     const existeUsuario = await Usuario.findOne({ email });
     if (existeUsuario) {
