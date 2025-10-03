@@ -10,9 +10,13 @@ const checkAuth = async (req, res, next) => {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             // Agrega el usuario del token a la petición
-            req.usuario = await Usuario.findById(decoded.id).select(
+            const usuario = await Usuario.findById(decoded.id).select(
                 "-password -confirmado -token -createdAt -updatedAt -__v"
             );
+            if (!usuario) {
+                return res.status(401).json({ msg: "Token no válido" });
+            }
+            req.usuario = usuario;
 
             return next(); // Pasa al siguiente middleware o controlador
         } catch (error) {

@@ -16,7 +16,7 @@ export const agregarTarea = async (req, res) => {
 
 export const obtenerTareas = async (req, res) => {
     // Buscamos todas las tareas donde el campo 'creador' coincida con el ID del usuario autenticado
-    const tareas = await Tarea.find().where("creador").equals(req.usuario);
+    const tareas = await Tarea.find().where("creador").equals(req.usuario._id);
     res.json(tareas);
 };
 

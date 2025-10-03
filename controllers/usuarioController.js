@@ -211,13 +211,24 @@ export const actualizarPerfil = async (req, res) => {
             return res.json({
                 msg: "Perfil actualizado. Se ha enviado un correo para confirmar tu nueva dirección de email. Por favor, revisa tu bandeja de entrada.",
                 emailCambiado: true, // Enviamos una bandera para facilitar el trabajo al frontend
+                usuario: {
+                    _id: usuarioActualizado._id,
+                    nombre: usuarioActualizado.nombre,
+                    apellido: usuarioActualizado.apellido,
+                    email: usuarioActualizado.email,
+                },
             });
         }
 
         // Mensaje estándar si solo se cambió nombre/apellido
         res.json({
             msg: "Perfil almacenado correctamente",
-            usuario: usuarioActualizado,
+            usuario: {
+                _id: usuarioActualizado._id,
+                nombre: usuarioActualizado.nombre,
+                apellido: usuarioActualizado.apellido,
+                email: usuarioActualizado.email,
+            },
         });
     } catch (error) {
         console.log(error);

@@ -20,7 +20,8 @@ const tareaSchema = mongoose.Schema(
         fechaEntrega: {
             type: Date,
             required: true,
-            default: Date.now(),
+            // Usar función para evaluar en tiempo de creación del documento
+            default: Date.now,
         },
         prioridad: {
             type: String,

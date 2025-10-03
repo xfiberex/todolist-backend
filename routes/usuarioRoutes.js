@@ -40,7 +40,7 @@ router.route("/olvide-password/:token").get(comprobarToken).post(nuevoPassword);
 // -- Área Privada -- //
 // Se necesita un JWT válido para acceder a esta ruta
 router.get("/perfil", checkAuth, perfil);
-router.put("/perfil/:id", checkAuth, actualizarPerfil);
+router.put("/perfil", checkAuth, actualizarPerfil);
 router.put("/actualizar-password-perfil", checkAuth, actualizarPasswordPerfil);
 
 export default router;
