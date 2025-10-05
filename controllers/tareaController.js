@@ -2,7 +2,7 @@ import Tarea from "../models/Tarea.js";
 
 export const agregarTarea = async (req, res) => {
     const tarea = new Tarea(req.body);
-    // Asignamos el creador de la tarea usando la información del usuario autenticado (del middleware)
+    // Registrar creador desde el usuario autenticado
     tarea.creador = req.usuario._id;
 
     try {
@@ -34,7 +34,7 @@ export const obtenerTarea = async (req, res) => {
         return res.status(404).json({ msg: error.message });
     }
 
-    // **Comprobación crucial**: Verificar que quien consulta la tarea es el creador
+    // Autorización: sólo el creador
     if (tarea.creador.toString() !== req.usuario._id.toString()) {
         const error = new Error("Acción no válida");
         return res.status(403).json({ msg: error.message });
@@ -123,6 +123,6 @@ export const cambiarEstadoTarea = async (req, res) => {
     tarea.estado = !tarea.estado;
     await tarea.save();
 
-    // 4. Devolver la tarea actualizada al frontend
+    // 4) Responder con tarea actualizada
     res.json(tarea);
 };

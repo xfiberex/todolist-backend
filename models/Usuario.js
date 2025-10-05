@@ -1,4 +1,3 @@
-// models/Usuario.js
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
@@ -34,19 +33,19 @@ const usuarioSchema = mongoose.Schema(
         },
     },
     {
-        timestamps: true, // Crea los campos createdAt y updatedAt
+        timestamps: true, // createdAt/updatedAt
     }
 );
 
-// Middleware de Mongoose para hashear el password antes de guardarlo
+// Hash de password antes de guardar
 usuarioSchema.pre("save", async function (next) {
-    // Importante: si el password no fue modificado, continuar sin re-hashear
+    // Evitar re-hash si no cambió
     if (!this.isModified("password")) return next();
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Método para comparar contraseñas
+// Comparar contraseñas
 usuarioSchema.methods.comprobarPassword = async function (passwordFormulario) {
     return await bcrypt.compare(passwordFormulario, this.password);
 };

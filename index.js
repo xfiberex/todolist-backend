@@ -18,9 +18,8 @@ dotenv.config(); // Para usar las variables de entorno
 
 conectarDB(); // Conectar a la base de datos
 
-// Configurar CORS
-// Dominios permitidos
-const whitelist = [process.env.FRONTEND_URL].filter(Boolean); // URL de tu frontend
+// CORS (permitir sólo orígenes confiables en producción)
+const whitelist = [process.env.FRONTEND_URL].filter(Boolean);
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -42,10 +41,10 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Aplicar a todas las rutas API
+// Rate limit API (50 req/15min por IP)
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 50, // Limita cada IP a 50 peticiones por ventana de tiempo
+  windowMs: 15 * 60 * 1000,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   message: "Demasiadas peticiones desde esta IP, por favor intenta de nuevo en 15 minutos",
@@ -58,7 +57,7 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use('/api', limiter);
 
-// Routing
+// Routes
 app.use("/api/usuarios", usuarioRoutes);
 app.use("/api/tareas", tareaRoutes);
 

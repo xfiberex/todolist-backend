@@ -1,4 +1,3 @@
-// middleware/authMiddleware.js
 import jwt from "jsonwebtoken";
 import Usuario from "../models/Usuario.js";
 
@@ -9,7 +8,7 @@ const checkAuth = async (req, res, next) => {
             token = req.headers.authorization.split(" ")[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Agrega el usuario del token a la petición
+            // Inyectar usuario en req (sin campos sensibles)
             const usuario = await Usuario.findById(decoded.id).select(
                 "-password -confirmado -token -createdAt -updatedAt -__v"
             );
@@ -18,7 +17,7 @@ const checkAuth = async (req, res, next) => {
             }
             req.usuario = usuario;
 
-            return next(); // Pasa al siguiente middleware o controlador
+            return next();
         } catch (error) {
             return res.status(401).json({ msg: "Token no válido" });
         }

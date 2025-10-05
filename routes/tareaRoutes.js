@@ -11,22 +11,21 @@ import checkAuth from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Todas las rutas de aquí en adelante requieren autenticación.
-// El middleware 'checkAuth' se ejecutará antes de cada controlador.
+// Rutas protegidas con checkAuth
 
-// Rutas agrupadas para '/api/tareas'
+// '/api/tareas'
 router
     .route("/")
-    .post(checkAuth, agregarTarea) // Crear una nueva tarea
-    .get(checkAuth, obtenerTareas); // Obtener todas las tareas del usuario
+    .post(checkAuth, agregarTarea)
+    .get(checkAuth, obtenerTareas);
 
-// Rutas agrupadas para '/api/tareas/:id'
+// '/api/tareas/:id'
 router
     .route("/:id")
-    .get(checkAuth, obtenerTarea) // Obtener una tarea específica
-    .put(checkAuth, actualizarTarea) // Actualizar una tarea específica
-    .delete(checkAuth, eliminarTarea); // Eliminar una tarea específica
+    .get(checkAuth, obtenerTarea)
+    .put(checkAuth, actualizarTarea)
+    .delete(checkAuth, eliminarTarea);
 
-router.post("/estado/:id", checkAuth, cambiarEstadoTarea); // Cambiar el estado de una tarea
+router.post("/estado/:id", checkAuth, cambiarEstadoTarea);
 
 export default router;

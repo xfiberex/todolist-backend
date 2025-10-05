@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-// No almacenar información sensible en un JWT
+// No incluir datos sensibles en el payload
 const generarJWT = id => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: "30d",

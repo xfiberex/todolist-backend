@@ -1,7 +1,7 @@
 import Usuario from "../models/Usuario.js";
 import generarJWT from "../helpers/generarJWT.js";
 import { emailRegistro, emailOlvidePassword } from "../helpers/emails.js";
-import generarId from "../helpers/generarId.js"; // Suponiendo que tienes un helper similar para tokens simples
+import generarId from "../helpers/generarId.js";
 import { validationResult } from "express-validator";
 
 export const registrar = async (req, res) => {
@@ -13,13 +13,13 @@ export const registrar = async (req, res) => {
 
     const { email, nombre, apellido } = req.body;
 
-    // 1. Validación de campos vacíos
+    // Validación rápida de campos vacíos
     if ([nombre, apellido, email].some((campo) => !campo || campo.trim() === "")) {
         const error = new Error("Todos los campos son obligatorios");
         return res.status(400).json({ msg: error.message });
     }
 
-    // Prevenir usuarios duplcleicados
+    // Evitar usuarios duplicados
     const existeUsuario = await Usuario.findOne({ email });
     if (existeUsuario) {
         const error = new Error("El usuario ya se encuentra registrado");
@@ -27,12 +27,12 @@ export const registrar = async (req, res) => {
     }
 
     try {
-        // Guardar el Nuevo Usuario
+        // Crear usuario + token de confirmación
         const usuario = new Usuario(req.body);
-        usuario.token = generarId(); // Genera un token único para la confirmación
+        usuario.token = generarId();
         const usuarioGuardado = await usuario.save();
 
-        // Enviar el email de confirmación
+        // Email de confirmación
         emailRegistro({
             email,
             nombre,
@@ -52,7 +52,7 @@ export const registrar = async (req, res) => {
 export const autenticar = async (req, res) => {
     const { email, password } = req.body;
 
-    // Comprobar si el usuario existe
+    // Buscar usuario por email
     const usuario = await Usuario.findOne({ email });
     if (!usuario) {
         const error = new Error("El Usuario no existe");
@@ -65,14 +65,14 @@ export const autenticar = async (req, res) => {
         return res.status(403).json({ msg: error.message });
     }
 
-    // Comprobar su password
+    // Validar contraseña
     if (await usuario.comprobarPassword(password)) {
         res.json({
             _id: usuario._id,
             nombre: usuario.nombre,
             apellido: usuario.apellido,
             email: usuario.email,
-            token: generarJWT(usuario._id), // Se genera el JSON Web Token para la sesión
+            token: generarJWT(usuario._id),
         });
     } else {
         const error = new Error("La contraseña es Incorrecta");
@@ -162,7 +162,7 @@ export const nuevoPassword = async (req, res) => {
 };
 
 export const perfil = (req, res) => {
-    const { usuario } = req; // Esto viene del middleware 'checkAuth'
+    const { usuario } = req; // Inyectado por checkAuth
     res.json(usuario);
 };
 
@@ -175,9 +175,9 @@ export const actualizarPerfil = async (req, res) => {
     }
 
     const { email } = req.body;
-    let emailCambiado = false; // Variable para controlar el flujo
+    let emailCambiado = false;
 
-    // 2. Lógica mejorada para el cambio de email
+    // Cambio de email => re-confirmación
     if (usuario.email !== email) {
         const existeEmail = await Usuario.findOne({ email });
         if (existeEmail) {
@@ -185,21 +185,20 @@ export const actualizarPerfil = async (req, res) => {
             return res.status(400).json({ msg: error.message });
         }
 
-        // --- LÓGICA DE RE-CONFIRMACIÓN ---
         usuario.email = email;
-        usuario.confirmado = false; // El usuario debe confirmar de nuevo
-        usuario.token = generarId(); // Se genera un nuevo token de un solo uso
-        emailCambiado = true; // Marcamos que el email ha cambiado
+        usuario.confirmado = false;
+        usuario.token = generarId();
+        emailCambiado = true;
     }
 
-    // Actualizamos nombre y apellido sin importar si el email cambió o no
+    // Actualizamos el nombre y apellido sin importar si el email cambió o no
     usuario.nombre = req.body.nombre || usuario.nombre;
     usuario.apellido = req.body.apellido || usuario.apellido;
 
     try {
         const usuarioActualizado = await usuario.save();
 
-        // 3. Si el email cambió, enviamos el nuevo correo de confirmación
+        // Enviar correo si cambió email
         if (emailCambiado) {
             emailRegistro({
                 email: usuarioActualizado.email,
@@ -207,10 +206,9 @@ export const actualizarPerfil = async (req, res) => {
                 token: usuarioActualizado.token,
             });
 
-            // 4. Enviamos un mensaje específico para este caso
             return res.json({
                 msg: "Perfil actualizado. Se ha enviado un correo para confirmar tu nueva dirección de email. Por favor, revisa tu bandeja de entrada.",
-                emailCambiado: true, // Enviamos una bandera para facilitar el trabajo al frontend
+                emailCambiado: true,
                 usuario: {
                     _id: usuarioActualizado._id,
                     nombre: usuarioActualizado.nombre,
@@ -237,31 +235,25 @@ export const actualizarPerfil = async (req, res) => {
 };
 
 export const actualizarPasswordPerfil = async (req, res) => {
-    // --- 1. Leer los datos ---
+    // Datos
     const { id } = req.usuario;
     const { pwd_actual, pwd_nuevo } = req.body;
 
-    // --- 2. Comprobar que el usuario existe ---
+    // Usuario existe
     const usuario = await Usuario.findById(id);
     if (!usuario) {
         const error = new Error("Hubo un error");
         return res.status(400).json({ msg: error.message });
     }
 
-    // --- 3. Comprobar la contraseña actual ---
+    // Validar contraseña actual
     if (await usuario.comprobarPassword(pwd_actual)) {
-        // --- 4. Almacenar la NUEVA contraseña ---
-        // Se asigna la contraseña nueva, no la actual.
+        // Guardar nueva contraseña
         usuario.password = pwd_nuevo;
-
-        // El método .save() activará el middleware 'pre-save' del modelo User
-        // que se encargará de hashear esta nueva contraseña antes de guardarla.
         await usuario.save();
 
-        // Enviar respuesta de éxito
         res.json({ msg: "Contraseña actualizada correctamente" });
     } else {
-        // Si la contraseña actual no coincide, enviar error.
         const error = new Error("La Contraseña Actual es Incorrecta");
         return res.status(400).json({ msg: error.message });
     }

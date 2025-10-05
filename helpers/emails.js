@@ -14,10 +14,10 @@ export const emailRegistro = async datos => {
 
     // Enviar email
     const info = await transport.sendMail({
-        from: '"ToDoList" <no-reply@todolist.com>', // sender address
-        to: email, // list of receivers
-        subject: "ToDoList - Confirma tu cuenta", // Subject line
-        text: "Confirma tu cuenta", // plain text body
+        from: '"ToDoList" <no-reply@todolist.com>',
+        to: email,
+        subject: "ToDoList - Confirma tu cuenta",
+        text: "Confirma tu cuenta",
         html: ` <p> Hola <strong>${nombre},</strong> gracias por registrarte en <strong>ToDoList</strong>.</p>
         <p>Solo falta un paso para confirmar tu cuenta. Haz click en el siguiente enlace: 
         <a href='${process.env.FRONTEND_URL}/confirmar/${token}'>Confirmar Cuenta</a>
@@ -25,7 +25,7 @@ export const emailRegistro = async datos => {
         
         <p>Si no creaste esta cuenta, puedes ignorar este mensaje.</p>
  
-        `, // html body
+        `,
     });
 
     console.log("Mensaje enviado: %s", info.messageId);
@@ -45,10 +45,10 @@ export const emailOlvidePassword = async datos => {
 
     // Enviar email
     const info = await transport.sendMail({
-        from: '"ToDoList" <no-reply@todolist.com>', // sender address
-        to: email, // list of receivers
-        subject: "ToDoList - Restablece tu contraseña", // Subject line
-        text: "Restablece tu contraseña", // plain text body
+        from: '"ToDoList" <no-reply@todolist.com>',
+        to: email,
+        subject: "ToDoList - Restablece tu contraseña",
+        text: "Restablece tu contraseña",
         html: ` <p> Hola <strong>${nombre},</strong> has solicitado restablecer tu contraseña.</p>
         <p>Sigue el siguiente enlace para crear una nueva contraseña: 
         <a href='${process.env.FRONTEND_URL}/olvide-password/${token}'>Restablecer contraseña</a>
@@ -56,7 +56,7 @@ export const emailOlvidePassword = async datos => {
         
         <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
  
-        `, // html body
+        `,
     });
 
     console.log("Mensaje enviado: %s", info.messageId);

@@ -1,4 +1,3 @@
-// models/Tarea.js
 import mongoose from "mongoose";
 
 const tareaSchema = mongoose.Schema(
@@ -15,7 +14,7 @@ const tareaSchema = mongoose.Schema(
         },
         estado: {
             type: Boolean,
-            default: false, // false: Incompleta, true: Completa
+            default: false, // false: incompleta, true: completa
         },
         fechaEntrega: {
             type: Date,
@@ -26,15 +25,15 @@ const tareaSchema = mongoose.Schema(
         prioridad: {
             type: String,
             required: true,
-            enum: ["Baja", "Media", "Alta"], // Solo permite estos valores
+            enum: ["Baja", "Media", "Alta"],
         },
         creador: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Usuario", // Referencia al modelo Usuario
+            ref: "Usuario",
         },
     },
     {
-        timestamps: true,
+        timestamps: true, // createdAt/updatedAt
     }
 );
 
