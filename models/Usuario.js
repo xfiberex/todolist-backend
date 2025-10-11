@@ -27,6 +27,9 @@ const usuarioSchema = mongoose.Schema(
         token: {
             type: String,
         },
+        tokenExpira: {
+            type: Date,
+        },
         confirmado: {
             type: Boolean,
             default: false,

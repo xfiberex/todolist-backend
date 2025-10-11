@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { body } from "express-validator";
 import {
     registrar,
@@ -12,8 +13,25 @@ import {
     actualizarPasswordPerfil,
 } from "../controllers/usuarioController.js";
 import checkAuth from "../middleware/authMiddleware.js";
+import { requirePublicRegistrationEnabled, requireForgotPasswordEnabled } from "../middleware/featureFlags.js";
 
 const router = express.Router();
+// Rate limiters específicos
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: Number(process.env.RATE_LIMIT_LOGIN_MAX),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Demasiados intentos de inicio de sesión. Intenta de nuevo más tarde.",
+});
+
+const forgotLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: Number(process.env.RATE_LIMIT_FORGOT_MAX),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Demasiadas solicitudes de recuperación. Intenta de nuevo más tarde.",
+});
 
 // Validaciones de registro
 const registroValidationRules = [
@@ -24,15 +42,15 @@ const registroValidationRules = [
 ];
 
 // Pública
-router.post("/registrar", registroValidationRules, registrar);
+router.post("/registrar", requirePublicRegistrationEnabled, registroValidationRules, registrar);
 
-router.post("/login", [
+router.post("/login", loginLimiter, [
     body("email", "El email es obligatorio").isEmail().normalizeEmail(),
     body("password", "La contraseña es obligatoria").not().isEmpty()
 ], autenticar);
 
 router.get("/confirmar/:token", confirmar);
-router.post("/olvide-password", olvidePassword);
+router.post("/olvide-password", requireForgotPasswordEnabled, forgotLimiter, olvidePassword);
 
 router.route("/olvide-password/:token").get(comprobarToken).post(nuevoPassword);
 

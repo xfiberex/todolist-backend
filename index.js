@@ -1,22 +1,40 @@
 // index.js
+import 'dotenv/config';
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from 'helmet';
-import dotenv from "dotenv";
 import cors from "cors";
 import conectarDB from "./config/db.js";
 import usuarioRoutes from "./routes/usuarioRoutes.js";
 import tareaRoutes from "./routes/tareaRoutes.js";
+import startCleanupDemoTasks from "./helpers/cleanupDemoTasks.js";
 
 const app = express();
 
+// Helmet básico siempre
 app.use(helmet());
+// CSP opcional para despliegues con UI controlada
+if (process.env.ENABLE_CSP === '1') {
+    app.use(
+        helmet.contentSecurityPolicy({
+            useDefaults: true,
+            directives: {
+                // Ajusta estas fuentes según tu hosting y necesidades
+                "default-src": ["'self'"],
+                "script-src": ["'self'", "'unsafe-inline'"],
+                "style-src": ["'self'", "'unsafe-inline'"],
+                "img-src": ["'self'", "data:"],
+                "connect-src": ["'self'", process.env.FRONTEND_URL],
+            },
+        })
+    );
+}
 
 app.use(express.json()); // Habilitar la lectura de JSON
 
-dotenv.config(); // Para usar las variables de entorno
-
 conectarDB(); // Conectar a la base de datos
+
+startCleanupDemoTasks(); // Iniciar tareas programadas después de establecer conexión a DB
 
 // CORS (permitir sólo orígenes confiables en producción)
 const whitelist = [process.env.FRONTEND_URL].filter(Boolean);
